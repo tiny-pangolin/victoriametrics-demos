@@ -17,11 +17,15 @@ services:
     restart: unless-stopped
     volumes:
       - ./uptime-kuma:/app/data
+    ports:
+      - 3001:3001
   gatus:
     image: twinproduction/gatus:latest
     container_name: gatus
     volumes:
       - ./gatus/config:/config
+    ports:
+      - 8080:8080
   blackbox-exporter:
     container_name: blackbox_exporter
     restart: unless-stopped
@@ -37,16 +41,18 @@ services:
     image: docker.io/telegraf:latest
     volumes:
       - ./telegraf:/etc/telegraf
-  vmagent:
-    container_name: vmagent
-    image: docker.io/victoriametrics/vmagent:latest
+    ports:
+      - 9273:9273
+  victoriametrics:
+    container_name: victoriametrics
+    image: docker.io/victoriametrics/victoria-metrics:latest
     restart: unless-stopped
     volumes:
-      - ./vmagent:/vmagent
+      - ./victoriametrics-config:/config
+      - ./victoriametrics-storage:/storage
     command:
-      - "-remoteWrite.tmpDataPath=/vmagent/remotewrite-data"
-      - "-promscrape.config=/vmagent/scrape.yml"
-      - "-remoteWrite.url=https://metrics.local.shiftsystems.net/prometheus/api/v1/write"
-      - "-remoteWrite.bearerToken=icky-vicky"
+      - "-promscrape.config=/config/scrape.yml"
+      - "-storageDataPath=/storage"
+      - "-retentionPeriod=90d"
     ports:
-      - 8429:8429
+      - 8428:8428
