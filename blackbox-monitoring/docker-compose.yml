@@ -6,9 +6,7 @@ services:
     env_file:
       - traefik.env
     volumes:
-      - type: bind
-        source: /opt/docker/traefik
-        target: /etc/traefik
+      - ./traefik:/etc/traefik
     ports:
      - "80:80"
      - "443:443"
@@ -18,18 +16,18 @@ services:
     image: docker.io/louislam/uptime-kuma:1
     restart: unless-stopped
     volumes:
-      - /opt/docker/uptime-kuma:/app/data
+      - ./uptime-kuma:/app/data
   gatus:
     image: twinproduction/gatus:latest
     container_name: gatus
     volumes:
-      - /opt/docker/gatus/config:/config
+      - ./gatus/config:/config
   blackbox-exporter:
     container_name: blackbox_exporter
     restart: unless-stopped
     image: quay.io/prometheus/blackbox-exporter:latest
     volumes:
-      - /opt/docker/blackbox-exporter/config:/config
+      - ./blackbox-exporter/config:/config
     command:
       - '--config.file=/config/blackbox.yml'
     ports:
@@ -38,13 +36,13 @@ services:
     container_name: telegraf
     image: docker.io/telegraf:latest
     volumes:
-      - /opt/docker/telegraf:/etc/telegraf
+      - ./telegraf:/etc/telegraf
   vmagent:
     container_name: vmagent
     image: docker.io/victoriametrics/vmagent:latest
     restart: unless-stopped
     volumes:
-      - /opt/docker/vmagent:/vmagent
+      - ./vmagent:/vmagent
     command:
       - "-remoteWrite.tmpDataPath=/vmagent/remotewrite-data"
       - "-promscrape.config=/vmagent/scrape.yml"

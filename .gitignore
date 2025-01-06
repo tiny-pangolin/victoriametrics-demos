@@ -4,3 +4,4 @@
 **/*.db-shm
 **/*acme.json
 **/remotewrite-data
+**/.cache/**
