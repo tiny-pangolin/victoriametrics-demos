@@ -6,3 +6,4 @@
 **/victoriametrics-storage
 **/remotewrite-data
 **/.cache/**
+**/traefik/**
