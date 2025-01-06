@@ -1,0 +1,91 @@
+serversTransport:
+  insecureSkipVerify: true
+providers:
+  file:
+    filename: /etc/traefik/traefik.yml
+tls:
+  certificates:
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+    forwardedHeaders:
+      insecure: true
+  websecure:
+    address: ":443"
+    http2:
+    forwardedHeaders:
+      insecure: true
+  metrics:
+    address: ":8082"
+certificatesResolvers:
+  dynamicResolver:
+    acme:
+      storage: /etc/traefik/acme.json
+      email: mathias@shiftsystems.net
+      dnsChallenge:
+        provider: 'cloudflare'
+        delayBeforeCheck: 0
+        resolvers:
+          - "1.1.1.1:53"
+          - "1.0.0.1:53"
+metrics:
+  prometheus:
+    entrypoint: metrics
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0
+    addRoutersLabels: true
+    addServicesLabels: true
+accessLog:
+  format: json
+
+http:
+  routers:
+    gatus:
+      rule: Host(`gatus.local.shiftsystems.net`)
+      tls:
+        certResolver: dynamicResolver
+      service: gatus
+      entryPoints:
+        - websecure
+    uptime-kuma:
+      rule: Host(`kuma.local.shiftsystems.net`)
+      tls:
+        certResolver: dynamicResolver
+      service: uptime-kuma
+      entryPoints:
+        - websecure
+  services:
+    uptime-kuma:
+      loadBalancer:
+        healthCheck:
+          path: /
+          interval: "10s"
+          timeout: "3s"
+        servers:
+          - url: http://uptime-kuma:3001
+    gatus:
+      loadBalancer:
+        healthCheck:
+          path: /
+          interval: "10s"
+          timeout: "3s"
+        servers:
+          - url: http://gatus:8080
+

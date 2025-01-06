@@ -1,0 +1,54 @@
+services:
+  traefik:
+    restart: unless-stopped
+    image: docker.io/traefik:latest
+    container_name: traefik
+    env_file:
+      - traefik.env
+    volumes:
+      - type: bind
+        source: /opt/docker/traefik
+        target: /etc/traefik
+    ports:
+     - "80:80"
+     - "443:443"
+     - "127.0.0.1:8082:8082"
+  uptime-kuma:
+    container_name: uptime-kuma
+    image: docker.io/louislam/uptime-kuma:1
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/uptime-kuma:/app/data
+  gatus:
+    image: twinproduction/gatus:latest
+    container_name: gatus
+    volumes:
+      - /opt/docker/gatus/config:/config
+  blackbox-exporter:
+    container_name: blackbox_exporter
+    restart: unless-stopped
+    image: quay.io/prometheus/blackbox-exporter:latest
+    volumes:
+      - /opt/docker/blackbox-exporter/config:/config
+    command:
+      - '--config.file=/config/blackbox.yml'
+    ports:
+      - 9115:9115
+  telegraf:
+    container_name: telegraf
+    image: docker.io/telegraf:latest
+    volumes:
+      - /opt/docker/telegraf:/etc/telegraf
+  vmagent:
+    container_name: vmagent
+    image: docker.io/victoriametrics/vmagent:latest
+    restart: unless-stopped
+    volumes:
+      - /opt/docker/vmagent:/vmagent
+    command:
+      - "-remoteWrite.tmpDataPath=/vmagent/remotewrite-data"
+      - "-promscrape.config=/vmagent/scrape.yml"
+      - "-remoteWrite.url=https://metrics.local.shiftsystems.net/prometheus/api/v1/write"
+      - "-remoteWrite.bearerToken=icky-vicky"
+    ports:
+      - 8429:8429
