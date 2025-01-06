@@ -35,7 +35,7 @@ certificatesResolvers:
   dynamicResolver:
     acme:
       storage: /etc/traefik/acme.json
-      email: mathias@shiftsystems.net
+      email: name@example.com
       dnsChallenge:
         provider: 'cloudflare'
         delayBeforeCheck: 0
@@ -58,21 +58,21 @@ accessLog:
 http:
   routers:
     victoriametrics:
-      rule: Host(`vm-demo.local.shiftsystems.net`)
+      rule: Host(`vm-demo.example.com`)
       tls:
         certResolver: dynamicResolver
       service: victoriametrics
       entryPoints:
         - websecure
     gatus:
-      rule: Host(`gatus.local.shiftsystems.net`)
+      rule: Host(`gatus.example.com`)
       tls:
         certResolver: dynamicResolver
       service: gatus
       entryPoints:
         - websecure
     uptime-kuma:
-      rule: Host(`kuma.local.shiftsystems.net`)
+      rule: Host(`kuma.example.com`)
       tls:
         certResolver: dynamicResolver
       service: uptime-kuma
